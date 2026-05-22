@@ -641,14 +641,53 @@ h1 {
 @media (max-width: 520px) {
   .app-shell {
     align-items: flex-start;
+    padding: 14px 10px 22px;
+  }
+
+  .panel {
+    padding: 22px 18px;
+  }
+
+  .eyebrow {
+    font-size: 0.68rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 12vw, 3rem);
+  }
+
+  .description {
+    font-size: 0.9rem;
+    line-height: 1.75;
+  }
+
+  .question-header {
+    margin-bottom: 18px;
+  }
+
+  .step-row {
+    font-size: 0.76rem;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 8px;
+  }
+
+  .back-button {
+    min-height: 34px;
+    margin-top: 10px;
+    padding: 7px 12px;
+    font-size: 0.82rem;
   }
 
   .question-stack {
-    min-height: 460px;
+    min-height: 400px;
   }
 
   .current-card {
-    min-height: 350px;
+    min-height: 300px;
+    padding: 22px 18px;
   }
 
   .question-card {
@@ -657,25 +696,91 @@ h1 {
   }
 
   .preview-card {
-    min-height: 350px;
+    min-height: 300px;
+    padding: 22px 18px;
+  }
+
+  .question-text {
+    margin-bottom: 18px;
+    font-size: clamp(0.92rem, 4.4vw, 1.1rem);
+    line-height: 1.5;
+  }
+
+  .options {
+    gap: 10px;
+  }
+
+  .options button,
+  .primary-button,
+  .secondary-button {
+    min-height: 48px;
+    padding: 12px 13px;
+    font-size: 0.84rem;
+  }
+
+  .options button {
+    line-height: 1.5;
+  }
+
+  .result-code {
+    margin: 14px 0 20px;
+    font-size: clamp(2.3rem, 16vw, 3.5rem);
+  }
+
+  .result-details {
+    gap: 8px;
+  }
+
+  .result-item {
+    padding: 12px;
+    font-size: 0.84rem;
+  }
+
+  .result-label {
+    font-size: 0.86rem;
+  }
+
+  .actions {
+    gap: 8px;
   }
 
   .synthesis-stage {
-    min-height: 580px;
+    min-height: 500px;
   }
 
   .synthesis-grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 6px;
+    gap: 5px;
   }
 
   .mini-card {
-    min-height: 58px;
-    padding: 6px;
+    min-height: 44px;
+    padding: 5px;
+  }
+
+  .mini-card-number {
+    margin-bottom: 5px;
+    font-size: 0.56rem;
   }
 
   .mini-card p {
     display: none;
+  }
+
+  .mini-options {
+    gap: 3px;
+  }
+
+  .mini-options span {
+    height: 6px;
+  }
+
+  .synthesis-core h1 {
+    font-size: clamp(2rem, 13vw, 3.4rem);
+  }
+
+  .synthesis-ring {
+    width: min(68vw, 260px);
   }
 
 }
