@@ -82,7 +82,7 @@ export const buildResult = (faithScores: FaithScores, attachmentScores: Attachme
     { label: '信心への向き合い方', value: char1 === 'E' ? '委ねる型 (Entrust)' : '探求する型 (Pursue)' },
     { label: '過去の物語', value: char2 === 'N' ? '逆境からの転換型 (Nadir)' : '穏やかな積み重ね型 (Serene)' },
     { label: '表現スタイル', value: char3 === 'E' ? '外向・表出型 (Expressive)' : '内向・受容型 (Receptive)' },
-    { label: '心の土壌（愛着）', value: attachmentLabel },
+    { label: '愛着スタイル', value: attachmentLabel },
   ];
 
   return { code, details };

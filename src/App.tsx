@@ -10,7 +10,17 @@ import {
 } from "./scoring";
 import type { AttachmentScores, FaithScores, FaithType } from "./types";
 
-const totalSteps = faithQuestions.length + attachmentQuestions.length;
+type OrderedQuestion =
+  | { kind: "attachment"; index: number }
+  | { kind: "faith"; index: number };
+
+const debugQuestionLimit: number | null = null;
+const fullQuestionOrder = buildQuestionOrder();
+const questionOrder =
+  debugQuestionLimit === null
+    ? fullQuestionOrder
+    : fullQuestionOrder.slice(0, debugQuestionLimit);
+const totalSteps = questionOrder.length;
 const slideDurationMs = 900;
 const synthesisDurationMs = 3600;
 
@@ -25,6 +35,20 @@ type AnswerHistoryItem = {
 type SlideDirection = "forward" | "back";
 type SelectedAnswerMap = Record<number, 0 | 1>;
 
+function buildQuestionOrder(): OrderedQuestion[] {
+  const order: OrderedQuestion[] = [];
+
+  for (let group = 0; group < faithQuestions.length; group++) {
+    for (let offset = 0; offset < 3; offset++) {
+      order.push({ kind: "attachment", index: group * 3 + offset });
+    }
+
+    order.push({ kind: "faith", index: group });
+  }
+
+  return order;
+}
+
 function App() {
   const [screen, setScreen] = useState<Screen>("start");
   const [currentStep, setCurrentStep] = useState(0);
@@ -34,9 +58,7 @@ function App() {
     initialAttachmentScores,
   );
   const [answerHistory, setAnswerHistory] = useState<AnswerHistoryItem[]>([]);
-  const [selectedAnswers, setSelectedAnswers] = useState<SelectedAnswerMap>(
-    {},
-  );
+  const [selectedAnswers, setSelectedAnswers] = useState<SelectedAnswerMap>({});
   const [slideDirection, setSlideDirection] =
     useState<SlideDirection>("forward");
   const [isSliding, setIsSliding] = useState(false);
@@ -272,27 +294,26 @@ type SynthesisScreenProps = {
 };
 
 function SynthesisScreen({ selectedAnswers }: SynthesisScreenProps) {
+  const columnCount = 6;
+  const rowCenter = (Math.ceil(totalSteps / columnCount) - 1) / 2;
+
   return (
     <section className="synthesis-stage" aria-live="polite">
       <div className="synthesis-grid" aria-label="回答の統合">
         {Array.from({ length: totalSteps }, (_, step) => {
           const question = getQuestionPreview(step);
           const selectedIndex = selectedAnswers[step];
-          const column = step % 6;
-          const row = Math.floor(step / 6);
+          const column = step % columnCount;
+          const row = Math.floor(step / columnCount);
           const distanceFromLast = totalSteps - 1 - step;
           const cardStyle = {
-            "--from-x": `${(2.5 - column - distanceFromLast * 1.16) * 118}%`,
-            "--from-y": `${(4.5 - row) * 112}%`,
-            animationDelay: `${step * 10}ms`,
+            "--from-x": `${(2.5 - column - distanceFromLast * 1.22) * 118}%`,
+            "--from-y": `${(rowCenter - row) * 112}%`,
+            "--row-delay": `${Math.max(0, 140 - distanceFromLast * 2)}ms`,
           } as CSSProperties;
 
           return (
-            <article
-              className="mini-card"
-              key={step}
-              style={cardStyle}
-            >
+            <article className="mini-card" key={step} style={cardStyle}>
               <div className="mini-card-number">
                 {String(step + 1).padStart(2, "0")}
               </div>
@@ -341,9 +362,10 @@ function QuestionScreen({
   const previousQuestion = getQuestionPreview(currentStep - 1);
   const nextQuestion = getQuestionPreview(currentStep + 1);
   const selectedIndex = selectedAnswers[currentStep];
+  const currentQuestion = questionOrder[currentStep];
 
-  if (currentStep < faithQuestions.length) {
-    const question = faithQuestions[currentStep];
+  if (currentQuestion.kind === "faith") {
+    const question = faithQuestions[currentQuestion.index];
 
     return (
       <section className="question-stage">
@@ -403,7 +425,7 @@ function QuestionScreen({
     );
   }
 
-  const attachmentIndex = currentStep - faithQuestions.length;
+  const attachmentIndex = currentQuestion.index;
   const [firstOption, secondOption] = getAttachmentOptions(attachmentIndex);
 
   return (
@@ -471,13 +493,15 @@ function getQuestionPreview(step: number) {
     return null;
   }
 
-  if (step < faithQuestions.length) {
-    const question = faithQuestions[step];
+  const orderedQuestion = questionOrder[step];
+
+  if (orderedQuestion.kind === "faith") {
+    const question = faithQuestions[orderedQuestion.index];
 
     return { text: question.q, options: [question.a, question.b] };
   }
 
-  const attachmentIndex = step - faithQuestions.length;
+  const attachmentIndex = orderedQuestion.index;
   const [firstOption, secondOption] = getAttachmentOptions(attachmentIndex);
 
   return {
