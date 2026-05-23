@@ -224,9 +224,7 @@ function App() {
         <section className="panel start-panel">
           <p className="eyebrow">Konkokyo Fogel Kinki</p>
           <h1>NBTI 診断</h1>
-          <p className="description">
-            あなたの「信心のスタイル」と「心の土壌（愛着）」を可視化します。全60問、所要時間は約5〜10分です。
-          </p>
+          <p className="description">全60問、所要時間は約5〜10分です。</p>
           <button
             className="primary-button"
             type="button"
