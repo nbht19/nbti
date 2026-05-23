@@ -1,4 +1,4 @@
-export type FaithType = 'EP' | 'NS' | 'ER';
+export type FaithType = "EP" | "NS" | "ER";
 
 export type FaithQuestion = {
   q: string;
