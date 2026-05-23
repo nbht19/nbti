@@ -162,7 +162,7 @@ export const buildResult = (
           ? "外向・表出型 (Expressive)"
           : "内向・受容型 (Receptive)",
     },
-    { label: "愛着スタイル", value: attachmentLabel },
+    { label: "愛着タイプ", value: attachmentLabel },
   ];
 
   return { code, details };
