@@ -65,7 +65,9 @@ function App() {
   const [isSliding, setIsSliding] = useState(false);
   const slideTimerRef = useRef<number | null>(null);
   const synthesisTimerRef = useRef<number | null>(null);
+  const copyTimerRef = useRef<number | null>(null);
   const answerHistoryRef = useRef<AnswerHistoryItem[]>([]);
+  const [hasCopiedResult, setHasCopiedResult] = useState(false);
   const result = useMemo(
     () => buildResult(faithScores, attachmentScores),
     [faithScores, attachmentScores],
@@ -82,6 +84,11 @@ function App() {
       synthesisTimerRef.current = null;
     }
 
+    if (copyTimerRef.current !== null) {
+      window.clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = null;
+    }
+
     answerHistoryRef.current = [];
     setScreen("question");
     setCurrentStep(0);
@@ -90,6 +97,7 @@ function App() {
     setAnswerHistory([]);
     setSelectedAnswers({});
     setIsSliding(false);
+    setHasCopiedResult(false);
   };
 
   const saveCurrentState = () => {
@@ -216,7 +224,16 @@ function App() {
     ].join("\n");
 
     await navigator.clipboard.writeText(text);
-    window.alert("結果をクリップボードにコピーしました！");
+    setHasCopiedResult(true);
+
+    if (copyTimerRef.current !== null) {
+      window.clearTimeout(copyTimerRef.current);
+    }
+
+    copyTimerRef.current = window.setTimeout(() => {
+      setHasCopiedResult(false);
+      copyTimerRef.current = null;
+    }, 3000);
   };
 
   return (
@@ -224,7 +241,7 @@ function App() {
       {screen === "start" && (
         <Card.Root className="panel start-panel">
           <Card.Body className="panel-body">
-            <Text className="eyebrow">Konkokyo Fogel Kinki</Text>
+            <Text className="eyebrow">Konkokyo Fogel</Text>
             <Heading as="h1">NBTI 診断</Heading>
             <Text className="description">
               全60問、所要時間は約5〜10分です。
@@ -285,7 +302,7 @@ function App() {
                 type="button"
                 onClick={copyResult}
               >
-                結果をコピーする
+                {hasCopiedResult ? "コピーしました！" : "結果をコピーする"}
               </Button>
               <Button
                 className="secondary-button"
