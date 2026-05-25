@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import { Button, Card, Heading, Progress, Stack, Text } from "@chakra-ui/react";
 import { attachmentQuestions, faithQuestions } from "./data";
 import {
   buildResult,
@@ -14,7 +15,7 @@ type OrderedQuestion =
   | { kind: "attachment"; index: number }
   | { kind: "faith"; index: number };
 
-const debugQuestionLimit: number | null = null;
+const debugQuestionLimit: number | null = 3;
 const fullQuestionOrder = buildQuestionOrder();
 const questionOrder =
   debugQuestionLimit === null
@@ -221,18 +222,23 @@ function App() {
   return (
     <main className="app-shell">
       {screen === "start" && (
-        <section className="panel start-panel">
-          <p className="eyebrow">Konkokyo Fogel Kinki</p>
-          <h1>NBTI 診断</h1>
-          <p className="description">全60問、所要時間は約5〜10分です。</p>
-          <button
-            className="primary-button"
-            type="button"
-            onClick={startDiagnosis}
-          >
-            診断を開始する
-          </button>
-        </section>
+        <Card.Root className="panel start-panel">
+          <Card.Body className="panel-body">
+            <Text className="eyebrow">Konkokyo Fogel Kinki</Text>
+            <Heading as="h1">NBTI 診断</Heading>
+            <Text className="description">
+              全60問、所要時間は約5〜10分です。
+            </Text>
+            <Button
+              className="primary-button"
+              colorPalette="blue"
+              type="button"
+              onClick={startDiagnosis}
+            >
+              診断を開始する
+            </Button>
+          </Card.Body>
+        </Card.Root>
       )}
 
       {screen === "question" && (
@@ -253,35 +259,45 @@ function App() {
       )}
 
       {screen === "result" && (
-        <section className="panel result-panel result-enter">
-          <p className="eyebrow">Diagnosis Result</p>
-          <h1>診断結果</h1>
-          <div className="result-code">{result.code}</div>
-          <div className="result-details">
-            {result.details.map((detail) => (
-              <div className="result-item" key={detail.label}>
-                <div className="result-label">{detail.label}</div>
-                <div>{detail.value}</div>
-              </div>
-            ))}
-          </div>
-          <div className="actions">
-            <button
-              className="primary-button"
-              type="button"
-              onClick={copyResult}
-            >
-              結果をコピーする
-            </button>
-            <button
-              className="secondary-button"
-              type="button"
-              onClick={startDiagnosis}
-            >
-              もう一度受ける
-            </button>
-          </div>
-        </section>
+        <Card.Root className="panel result-panel result-enter">
+          <Card.Body className="panel-body">
+            <Text className="eyebrow">Diagnosis Result</Text>
+            <Heading as="h1">診断結果</Heading>
+            <Text as="div" className="result-code">
+              {result.code}
+            </Text>
+            <Stack className="result-details">
+              {result.details.map((detail) => (
+                <Card.Root className="result-item" key={detail.label}>
+                  <Card.Body className="result-item-body">
+                    <Text as="div" className="result-label">
+                      {detail.label}
+                    </Text>
+                    <Text as="div">{detail.value}</Text>
+                  </Card.Body>
+                </Card.Root>
+              ))}
+            </Stack>
+            <Stack className="actions">
+              <Button
+                className="primary-button"
+                colorPalette="blue"
+                type="button"
+                onClick={copyResult}
+              >
+                結果をコピーする
+              </Button>
+              <Button
+                className="secondary-button"
+                variant="outline"
+                type="button"
+                onClick={startDiagnosis}
+              >
+                もう一度受ける
+              </Button>
+            </Stack>
+          </Card.Body>
+        </Card.Root>
       )}
     </main>
   );
@@ -311,24 +327,26 @@ function SynthesisScreen({ selectedAnswers }: SynthesisScreenProps) {
           } as CSSProperties;
 
           return (
-            <article className="mini-card" key={step} style={cardStyle}>
-              <div className="mini-card-number">
-                {String(step + 1).padStart(2, "0")}
-              </div>
-              <p>{question?.text}</p>
-              <div className="mini-options">
-                <span className={selectedIndex === 0 ? "is-selected" : ""} />
-                <span className={selectedIndex === 1 ? "is-selected" : ""} />
-              </div>
-            </article>
+            <Card.Root className="mini-card" key={step} style={cardStyle}>
+              <Card.Body className="mini-card-body">
+                <Text as="div" className="mini-card-number">
+                  {String(step + 1).padStart(2, "0")}
+                </Text>
+                <Text>{question?.text}</Text>
+                <div className="mini-options">
+                  <span className={selectedIndex === 0 ? "is-selected" : ""} />
+                  <span className={selectedIndex === 1 ? "is-selected" : ""} />
+                </div>
+              </Card.Body>
+            </Card.Root>
           );
         })}
       </div>
       <div className="synthesis-core">
         <div className="synthesis-ring" />
         <div>
-          <p className="eyebrow">Integrating</p>
-          <h1>集計中</h1>
+          <Text className="eyebrow">Integrating</Text>
+          <Heading as="h1">集計中</Heading>
         </div>
       </div>
     </section>
@@ -385,30 +403,16 @@ function QuestionScreen({
               selectedIndex={selectedAnswers[currentStep - 1]}
             />
           )}
-          <article
+          <DiagnosisCard
             className="question-card current-card"
             key={`current-${currentStep}`}
-          >
-            <h2 className="question-text">{question.q}</h2>
-            <div className="options">
-              <button
-                className={selectedIndex === 0 ? "is-selected" : undefined}
-                type="button"
-                aria-pressed={selectedIndex === 0}
-                onClick={() => onFaithAnswer(question.type, "A")}
-              >
-                {question.a}
-              </button>
-              <button
-                className={selectedIndex === 1 ? "is-selected" : undefined}
-                type="button"
-                aria-pressed={selectedIndex === 1}
-                onClick={() => onFaithAnswer(question.type, "B")}
-              >
-                {question.b}
-              </button>
-            </div>
-          </article>
+            text={question.q}
+            options={[question.a, question.b]}
+            selectedIndex={selectedIndex}
+            onSelect={(index) =>
+              onFaithAnswer(question.type, index === 0 ? "A" : "B")
+            }
+          />
           {nextQuestion && (
             <PreviewCard
               key={`next-${currentStep + 1}`}
@@ -446,32 +450,16 @@ function QuestionScreen({
             selectedIndex={selectedAnswers[currentStep - 1]}
           />
         )}
-        <article
+        <DiagnosisCard
           className="question-card current-card"
           key={`current-${currentStep}`}
-        >
-          <h2 className="question-text">
-            {attachmentQuestions[attachmentIndex]}
-          </h2>
-          <div className="options">
-            <button
-              className={selectedIndex === 0 ? "is-selected" : undefined}
-              type="button"
-              aria-pressed={selectedIndex === 0}
-              onClick={() => onAttachmentAnswer(attachmentIndex + 1, 1)}
-            >
-              {firstOption}
-            </button>
-            <button
-              className={selectedIndex === 1 ? "is-selected" : undefined}
-              type="button"
-              aria-pressed={selectedIndex === 1}
-              onClick={() => onAttachmentAnswer(attachmentIndex + 1, 2)}
-            >
-              {secondOption}
-            </button>
-          </div>
-        </article>
+          text={attachmentQuestions[attachmentIndex]}
+          options={[firstOption, secondOption]}
+          selectedIndex={selectedIndex}
+          onSelect={(index) =>
+            onAttachmentAnswer(attachmentIndex + 1, index === 0 ? 1 : 2)
+          }
+        />
         {nextQuestion && (
           <PreviewCard
             key={`next-${currentStep + 1}`}
@@ -515,6 +503,57 @@ type PreviewCardProps = {
   selectedIndex?: 0 | 1;
 };
 
+type DiagnosisCardProps = {
+  className: string;
+  text: string;
+  options: string[];
+  selectedIndex?: 0 | 1;
+  onSelect?: (index: 0 | 1) => void;
+  ariaHidden?: boolean;
+};
+
+function DiagnosisCard({
+  className,
+  text,
+  options,
+  selectedIndex,
+  onSelect,
+  ariaHidden = false,
+}: DiagnosisCardProps) {
+  return (
+    <Card.Root className={className} aria-hidden={ariaHidden}>
+      <Card.Body className="question-card-body" p="0">
+        <Heading as="h2" className="question-text">
+          {text}
+        </Heading>
+        <div className="options">
+          {options.map((option, index) => (
+            <Button
+              className={selectedIndex === index ? "is-selected" : undefined}
+              colorPalette="blue"
+              justifyContent="flex-start"
+              minH="54px"
+              px="18px"
+              py="15px"
+              textAlign="left"
+              type="button"
+              variant={selectedIndex === index ? "solid" : "outline"}
+              whiteSpace="normal"
+              w="100%"
+              aria-pressed={selectedIndex === index}
+              key={option}
+              tabIndex={onSelect ? undefined : -1}
+              onClick={() => onSelect?.(index as 0 | 1)}
+            >
+              {option}
+            </Button>
+          ))}
+        </div>
+      </Card.Body>
+    </Card.Root>
+  );
+}
+
 function PreviewCard({
   position,
   text,
@@ -522,24 +561,13 @@ function PreviewCard({
   selectedIndex,
 }: PreviewCardProps) {
   return (
-    <article
+    <DiagnosisCard
       className={`question-card preview-card ${position}`}
-      aria-hidden="true"
-    >
-      <h2 className="question-text">{text}</h2>
-      <div className="options">
-        {options.map((option, index) => (
-          <button
-            className={selectedIndex === index ? "is-selected" : undefined}
-            type="button"
-            tabIndex={-1}
-            key={option}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
-    </article>
+      text={text}
+      options={options}
+      selectedIndex={selectedIndex}
+      ariaHidden
+    />
   );
 }
 
@@ -559,21 +587,28 @@ function QuestionHeader({
   return (
     <div className="question-header">
       <div className="step-row">
-        <span className="step-count">
+        <Text as="span" className="step-count">
           {currentStep + 1} / {totalSteps}
-        </span>
+        </Text>
       </div>
-      <div className="progress-bar" aria-label="診断の進捗">
-        <div className="progress-inner" style={{ width: `${progress}%` }} />
-      </div>
-      <button
+      <Progress.Root
+        className="progress-bar"
+        aria-label="診断の進捗"
+        value={progress}
+      >
+        <Progress.Track className="progress-track">
+          <Progress.Range className="progress-inner" />
+        </Progress.Track>
+      </Progress.Root>
+      <Button
         className="back-button"
+        variant="outline"
         type="button"
         onClick={onBack}
         disabled={!canGoBack}
       >
         戻る
-      </button>
+      </Button>
     </div>
   );
 }
