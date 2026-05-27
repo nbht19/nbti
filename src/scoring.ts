@@ -144,6 +144,7 @@ export const buildResult = (
 
   const code = `${char4}-${char1}${char2}${char3}`;
   const details: ResultDetail[] = [
+    { label: "愛着タイプ", value: attachmentLabel },
     {
       label: "信心への向き合い方",
       value: char1 === "E" ? "委ねる型 (Entrust)" : "探求する型 (Pursue)",
@@ -162,7 +163,6 @@ export const buildResult = (
           ? "外向・表出型 (Expressive)"
           : "内向・受容型 (Receptive)",
     },
-    { label: "愛着タイプ", value: attachmentLabel },
   ];
 
   return { code, details };
