@@ -1,0 +1,17 @@
+.start-panel {
+  text-align: center;
+}
+
+.description {
+  max-width: 540px;
+  margin: 0 auto 28px;
+  color: var(--muted);
+  line-height: 1.85;
+}
+
+@media (max-width: 520px) {
+  .description {
+    font-size: 0.9rem;
+    line-height: 1.75;
+  }
+}

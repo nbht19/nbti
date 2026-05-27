@@ -1,0 +1,116 @@
+.mini-card {
+  min-height: 78px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 10px 24px rgba(29, 43, 58, 0.08);
+  opacity: 0;
+  transform-origin: center;
+  animation: mini-card-reflow 2400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--spread-delay);
+}
+
+.mini-card-body {
+  padding: 0;
+}
+
+.mini-card-number {
+  margin-bottom: 4px;
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.mini-card p {
+  display: -webkit-box;
+  min-height: 28px;
+  margin: 0 0 8px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  color: var(--primary);
+  font-size: 0.62rem;
+  line-height: 1.35;
+}
+
+.mini-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.mini-options span {
+  height: 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+
+.mini-options span.is-selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.16);
+}
+
+@keyframes mini-card-reflow {
+  0% {
+    opacity: 1;
+    filter: none;
+    transform: translate(var(--from-x), var(--from-y)) scale(var(--start-scale));
+  }
+
+  18% {
+    opacity: 1;
+    filter: none;
+    transform: translate(var(--from-x), var(--from-y)) scale(var(--start-scale));
+  }
+
+  48% {
+    opacity: 1;
+    filter: none;
+    transform: translate(var(--from-x), var(--from-y)) scale(var(--mid-scale));
+  }
+
+  72% {
+    filter: none;
+    transform: translate(var(--from-x), var(--from-y)) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    filter: none;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@media (max-width: 520px) {
+  .mini-card {
+    min-height: 44px;
+    padding: 5px;
+  }
+
+  .mini-card-number {
+    margin-bottom: 5px;
+    font-size: 0.56rem;
+  }
+
+  .mini-card p {
+    display: none;
+  }
+
+  .mini-options {
+    gap: 3px;
+  }
+
+  .mini-options span {
+    height: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-card {
+    animation: none;
+  }
+}
