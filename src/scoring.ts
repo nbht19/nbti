@@ -142,7 +142,7 @@ export const buildResult = (
     attachmentLabel = "回避型 (Avoidant)";
   }
 
-  const code = `${char1}${char2}${char3}-${char4}`;
+  const code = `${char4}-${char1}${char2}${char3}`;
   const details: ResultDetail[] = [
     {
       label: "信心への向き合い方",
@@ -156,7 +156,7 @@ export const buildResult = (
           : "穏やかな積み重ね型 (Serene)",
     },
     {
-      label: "表現スタイル",
+      label: "人との関わり方",
       value:
         char3 === "E"
           ? "外向・表出型 (Expressive)"
