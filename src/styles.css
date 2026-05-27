@@ -8,10 +8,126 @@
   --text: #27313b;
   --muted: #66727f;
   --border: #dce4e1;
+  --body-bg:
+    radial-gradient(circle at 10% 10%, rgba(47, 128, 237, 0.13), transparent 30%),
+    linear-gradient(135deg, #eef3f1 0%, #f9fbfb 55%, #eaf1f6 100%);
+  --panel-bg: rgba(255, 255, 255, 0.9);
+  --panel-border: rgba(255, 255, 255, 0.7);
+  --card-bg: rgba(255, 255, 255, 0.93);
+  --option-hover-bg: #f3f8ff;
+  --option-selected-bg: #f0f7ff;
+  --progress-track: #dce6e9;
+  --progress-accent-2: #5bbf9d;
+  --progress-accent-3: #a770ef;
+  --accent-shadow: rgba(47, 128, 237, 0.24);
   --shadow: 0 18px 45px rgba(29, 43, 58, 0.14);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: var(--text);
   background: var(--bg);
+}
+
+:root[data-theme="mint"] {
+  --primary: #24403c;
+  --accent: #2a9d8f;
+  --accent-strong: #1f7f74;
+  --bg: #eef8f4;
+  --surface: #ffffff;
+  --surface-soft: #f2faf7;
+  --text: #263b37;
+  --muted: #657a75;
+  --border: #d7e8e2;
+  --body-bg:
+    radial-gradient(circle at 14% 12%, rgba(42, 157, 143, 0.18), transparent 30%),
+    radial-gradient(circle at 84% 18%, rgba(111, 207, 151, 0.2), transparent 28%),
+    linear-gradient(135deg, #eef8f4 0%, #fbfdfa 54%, #eaf5f7 100%);
+  --panel-bg: rgba(255, 255, 255, 0.9);
+  --panel-border: rgba(255, 255, 255, 0.72);
+  --card-bg: rgba(255, 255, 255, 0.94);
+  --option-hover-bg: #effaf6;
+  --option-selected-bg: #e8f7f3;
+  --progress-track: #d8ebe5;
+  --progress-accent-2: #6fcf97;
+  --progress-accent-3: #70b8ff;
+  --accent-shadow: rgba(42, 157, 143, 0.22);
+  --shadow: 0 18px 45px rgba(35, 75, 67, 0.14);
+}
+
+:root[data-theme="rose"] {
+  --primary: #2f2740;
+  --accent: #d94f86;
+  --accent-strong: #b93a70;
+  --bg: #fff2ec;
+  --surface: #fffaf7;
+  --surface-soft: #fff0f5;
+  --text: #382f44;
+  --muted: #756477;
+  --border: #ead7e1;
+  --body-bg:
+    radial-gradient(circle at 13% 14%, rgba(217, 79, 134, 0.18), transparent 30%),
+    radial-gradient(circle at 84% 18%, rgba(93, 184, 167, 0.2), transparent 28%),
+    linear-gradient(135deg, #fff2ec 0%, #fff8df 48%, #edf7ff 100%);
+  --panel-bg: rgba(255, 250, 247, 0.9);
+  --panel-border: rgba(255, 255, 255, 0.72);
+  --card-bg: rgba(255, 250, 247, 0.94);
+  --option-hover-bg: #fff2f7;
+  --option-selected-bg: #ffeaf3;
+  --progress-track: #f0dfe5;
+  --progress-accent-2: #5db8a7;
+  --progress-accent-3: #f2c94c;
+  --accent-shadow: rgba(217, 79, 134, 0.22);
+  --shadow: 0 18px 45px rgba(74, 44, 82, 0.14);
+}
+
+:root[data-theme="violet"] {
+  --primary: #312f55;
+  --accent: #7c5cff;
+  --accent-strong: #6345df;
+  --bg: #f2f0ff;
+  --surface: #ffffff;
+  --surface-soft: #f6f4ff;
+  --text: #34304d;
+  --muted: #6d6884;
+  --border: #ddd8f4;
+  --body-bg:
+    radial-gradient(circle at 12% 12%, rgba(124, 92, 255, 0.18), transparent 30%),
+    radial-gradient(circle at 84% 17%, rgba(91, 191, 157, 0.18), transparent 27%),
+    linear-gradient(135deg, #f2f0ff 0%, #fbfaff 54%, #edf7f4 100%);
+  --panel-bg: rgba(255, 255, 255, 0.9);
+  --panel-border: rgba(255, 255, 255, 0.72);
+  --card-bg: rgba(255, 255, 255, 0.94);
+  --option-hover-bg: #f4f1ff;
+  --option-selected-bg: #ede8ff;
+  --progress-track: #ded9f1;
+  --progress-accent-2: #5bbf9d;
+  --progress-accent-3: #f2c94c;
+  --accent-shadow: rgba(124, 92, 255, 0.22);
+  --shadow: 0 18px 45px rgba(58, 48, 94, 0.14);
+}
+
+:root[data-theme="amber"] {
+  --primary: #443626;
+  --accent: #d88a24;
+  --accent-strong: #b87019;
+  --bg: #fff6e8;
+  --surface: #ffffff;
+  --surface-soft: #fff9ef;
+  --text: #40362b;
+  --muted: #796b5b;
+  --border: #ecddc6;
+  --body-bg:
+    radial-gradient(circle at 13% 13%, rgba(216, 138, 36, 0.18), transparent 30%),
+    radial-gradient(circle at 83% 18%, rgba(47, 128, 237, 0.14), transparent 28%),
+    linear-gradient(135deg, #fff6e8 0%, #fffdf4 52%, #edf7ff 100%);
+  --panel-bg: rgba(255, 255, 255, 0.9);
+  --panel-border: rgba(255, 255, 255, 0.72);
+  --card-bg: rgba(255, 255, 255, 0.94);
+  --option-hover-bg: #fff7e9;
+  --option-selected-bg: #ffefd4;
+  --progress-track: #eadcc6;
+  --progress-accent-2: #2f80ed;
+  --progress-accent-3: #56cc9d;
+  --accent-shadow: rgba(216, 138, 36, 0.22);
+  --shadow: 0 18px 45px rgba(84, 60, 30, 0.14);
 }
 
 * {
@@ -22,9 +138,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 10% 10%, rgba(47, 128, 237, 0.13), transparent 30%),
-    linear-gradient(135deg, #eef3f1 0%, #f9fbfb 55%, #eaf1f6 100%);
+  background: var(--body-bg);
+  transition: background 240ms ease, color 240ms ease;
 }
 
 button {
@@ -34,11 +149,12 @@ button {
 .panel {
   width: 100%;
   padding: 0;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
+  transition: background-color 240ms ease, border-color 240ms ease, box-shadow 240ms ease;
 }
 
 .panel-body {
@@ -77,7 +193,7 @@ h1 {
 .primary-button {
   background: var(--accent);
   color: white;
-  box-shadow: 0 12px 24px rgba(47, 128, 237, 0.24);
+  box-shadow: 0 12px 24px var(--accent-shadow);
 }
 
 .primary-button:hover {
@@ -91,8 +207,8 @@ h1 {
 }
 
 .secondary-button:hover {
-  background: white;
-  border-color: #b9c8c4;
+  background: var(--surface);
+  border-color: var(--accent);
 }
 
 .primary-button:active,
