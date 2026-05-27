@@ -1,0 +1,27 @@
+.result-item {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.result-item-body {
+  padding: 0;
+}
+
+.result-label {
+  margin-bottom: 4px;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+@media (max-width: 520px) {
+  .result-item {
+    padding: 12px;
+    font-size: 0.84rem;
+  }
+
+  .result-label {
+    font-size: 0.86rem;
+  }
+}

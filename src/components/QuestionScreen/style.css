@@ -1,0 +1,43 @@
+.question-stage {
+  width: 100%;
+  padding: 18px 0 34px;
+}
+
+.question-stack {
+  position: relative;
+  height: 460px;
+  overflow: hidden;
+  perspective: 1200px;
+}
+
+.block-scroll {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  scroll-behavior: auto;
+  touch-action: pan-y;
+}
+
+.blocks-track {
+  display: grid;
+  grid-auto-columns: 100%;
+  grid-auto-flow: column;
+  align-items: start;
+  width: 100%;
+  min-height: 100%;
+}
+
+@media (max-width: 520px) {
+  .question-stage {
+    padding-top: 72px;
+  }
+
+  .question-stack {
+    height: 420px;
+  }
+
+  .block-scroll {
+    padding: 0;
+  }
+}

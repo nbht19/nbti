@@ -1,0 +1,124 @@
+.synthesis-stage {
+  position: relative;
+  width: 100%;
+  min-height: 640px;
+  display: grid;
+  place-items: center;
+}
+
+.synthesis-grid {
+  width: min(100%, 680px);
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  transform-origin: center;
+  animation: synthesis-camera 3600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.synthesis-core {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  text-align: center;
+  animation: core-reveal 3600ms ease both;
+}
+
+.synthesis-core h1 {
+  margin-bottom: 0;
+  font-size: clamp(2.4rem, 10vw, 4.8rem);
+}
+
+.synthesis-ring {
+  position: absolute;
+  width: min(54vw, 320px);
+  aspect-ratio: 1;
+  border: 2px solid rgba(47, 128, 237, 0.32);
+  border-radius: 50%;
+  animation: ring-pulse 1600ms ease-in-out infinite;
+}
+
+@keyframes synthesis-camera {
+  0% {
+    opacity: 1;
+    filter: none;
+    transform: scale(2.25);
+  }
+
+  32% {
+    opacity: 1;
+    filter: none;
+    transform: scale(1.52);
+  }
+
+  64% {
+    opacity: 1;
+    filter: none;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0.22;
+    filter: blur(1px);
+    transform: scale(0.86);
+  }
+}
+
+@keyframes core-reveal {
+  0%,
+  42% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  68%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ring-pulse {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.04);
+  }
+
+  100% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+}
+
+@media (max-width: 520px) {
+  .synthesis-stage {
+    min-height: 500px;
+  }
+
+  .synthesis-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .synthesis-core h1 {
+    font-size: clamp(2rem, 13vw, 3.4rem);
+  }
+
+  .synthesis-ring {
+    width: min(68vw, 260px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .synthesis-grid,
+  .synthesis-core,
+  .synthesis-ring {
+    animation: none;
+  }
+}

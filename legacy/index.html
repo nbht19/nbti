@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBTI 診断 - 金光教フォーゲル近畿連盟</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-inner {
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        button {
+            padding: 15px 20px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        button:hover {
+            border-color: var(--accent-color);
+            background-color: #f0f8ff;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .result-code {
+            font-size: 3rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--accent-color);
+            margin: 20px 0;
+            letter-spacing: 2px;
+        }
+
+        .result-details {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .share-btn {
+            display: block;
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 30px;
+            border: none;
+        }
+
+        .hidden { display: none; }
+
+        .start-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- Start Screen -->
+    <div id="screen-start" class="card">
+        <h1>NBTI 診断</h1>
+        <p class="description">あなたの「信心のスタイル」と「心の土壌（愛着）」を可視化します。全60問、所要時間は約5〜10分です。</p>
+        <button class="start-btn" onclick="startDiagnosis()">診断を開始する</button>
+    </div>
+
+    <!-- Question Screen -->
+    <div id="screen-question" class="card hidden">
+        <div id="part-label" style="font-size: 0.8rem; color: var(--accent-color); font-weight: bold; margin-bottom: 5px;"></div>
+        <div class="progress-bar"><div id="progress-inner" class="progress-inner" style="width: 0%;"></div></div>
+        <div id="question-content">
+            <div id="q-text" class="question-text"></div>
+            <div id="q-options" class="options"></div>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="screen-result" class="card hidden">
+        <h1>診断結果</h1>
+        <div class="result-code" id="res-code"></div>
+        <div class="result-details" id="res-details"></div>
+        <button class="share-btn" onclick="copyResult()">結果をコピーする</button>
+        <button style="margin-top: 10px; width: 100%; text-align: center;" onclick="location.reload()">もう一度受ける</button>
+    </div>
+</div>
+
+<script>
+    // --- Data Definition ---
+    const faithQuestions = [
+        { q: "信心をしていく上で、より大切にしたい姿勢は？", a: "理屈を超えて、まずは神様を信頼し、すべてを安心してお任せ（委ね）すること", b: "教理や体験の意味を自分なりに深く考え、納得した上で、真理を追い求めていくこと", type: "EP" },
+        { q: "解決の難しい問題が起きた時、あなたの心はどちらに向かいやすい？", a: "「神様にお任せしよう」と祈りを重ね、心の中にある重荷を手放そうとする", b: "「これは何を知らされているのか」と、教えに照らしてその意味を理解しようとする", type: "EP" },
+        { q: "御教え（教え）を学んでいるとき、どのような感覚になることが多い？", a: "言葉の奥にある神様の温かさや、大きな慈しみに触れ、心が安らぐ", b: "物事の筋道や、人生をより良く生きるための法則としての整合性に感銘を受ける", type: "EP" },
+        { q: "あなたが憧れる「理想の信仰者」に近いのは？", a: "どんな時でも揺るがず、神様と一体となって、穏やかに日々を過ごしている人", b: "深い洞察力を持ち、どんな問いに対しても、筋道の通った明快な答えを導き出せる人", type: "EP" },
+        { q: "自身の信心のスタイルを一言で表すと？", a: "「大きな親心に包まれ、すべてを委ねるような信心」", b: "「真理を愛し、生涯をかけて道を究めようとする信心」", type: "EP" },
+        { q: "あなたのこれまでの歩みをグラフに例えるなら？", a: "非常に高い山と、深い谷があるような、変化と起伏に富んだグラフ", b: "大きな落差は少なく、全体として穏やかに流れていくような、なだらかなグラフ", type: "NS" },
+        { q: "あなたの価値観が形成される上で、より大きな影響を与えたのは？", a: "大きな挫折や困難を経験し、そこから新しく生まれ変わったような経験", b: "日々の生活や育ちの中で、周囲からの愛情を自然に受け継ぎ、積み重ねてきた経験", type: "NS" },
+        { q: "過去の最大の「難儀（困難）」を、どのように捉えている？", a: "自分の力ではどうしようもなく、人生が大きく転換するような決定的な経験だった", b: "苦労はあったが、それは自分を成長させるための大切なプロセスの一部だった", type: "NS" },
+        { q: "自分の半生を物語にするなら、どちらのタイトルがふさわしい？", a: "「試練を越えて、真の自分に出会う物語」", b: "「日々の恵みの中に、豊かさを見出す物語」", type: "NS" },
+        { q: "あなたが神様に、より真剣に祈りを捧げたくなるのは？", a: "自力ではどうしようもない困難に直面し、一歩も動けなくなったとき", b: "日々の安泰に感謝し、この幸せな歩みが続くことを願うとき", type: "NS" },
+        { q: "素晴らしいおかげや気づきがあった時、まずどのように行動する？", a: "すぐに誰かに話したくなる。SNSや会話を通じて、その喜びを周囲に分かち合いたい", b: "まずは自分一人で静かに噛みしめ、その喜びを内側でじっくりと深める時間を持ちたい", type: "ER" },
+        { q: "グループ活動中、自分にとって心地よい立ち位置は？", a: "積極的に自分の意見を発信し、活発な対話を通じて場を動かしているとき", b: "周囲の話をじっくり聞き、その場の空気を感じ取りながら、全体を静かに支えているとき", type: "ER" },
+        { q: "あなたが思う、より自分に合った「道を伝える」形は？", a: "自分の体験や神様の素晴らしさを、言葉を尽くして情熱的に語り、相手に働きかけること", b: "相手の話をどこまでも聞き、すべてを受容する姿を見せることで、安心感を与えること", type: "ER" },
+        { q: "心が大きく動いたとき、あなたのエネルギーはどう現れやすい？", a: "声や表情、ジェスチャーなど、自然と外に溢れ出て、周囲にも伝わりやすい", b: "外見は静かでも、内面では深く、豊かに、言葉にできないほど強く感じている", type: "ER" },
+        { q: "誰かの相談に乗っているとき、より大切にしていることは？", a: "自分の経験を元に、相手を励ましたり、前向きなアドバイスを伝えたりすること", b: "相手が話しやすいように寄り添い、ただひたすらに最後まで丁寧に聞き続けること", type: "ER" }
+    ];
+
+    const attachmentQuestions = [
+        "積極的に新しいことをしたり、新しい場所に出かけたり、新しい人に会ったりする方ですか。",
+        "誰とでもすぐに打ち解けたり、くつろげる方ですか。",
+        "もし困ったことがあっても、どうにかなると楽観的に考える方ですか。",
+        "親しい友人や知人のことを心から信頼する方ですか。",
+        "人を責めたり、攻撃的になりやすいところがありますか。",
+        "今まで経験のないことをするとき、不安を感じやすい方ですか。",
+        "あなたの親（養育者）は、あなたに対して冷淡なところがありましたか。",
+        "人はいざというとき、裏切ったり、当てにならなかったりするものだと思いますか。",
+        "あなたの親（養育者）は、あなたを評価してくれるよりも、批判的ですか。",
+        "子どものころの思い出は、楽しいことの方が多いですか。",
+        "あなたの親（養育者）に対して、とても感謝していますか。",
+        "つらいことがあったとき、親や家族のことを思い出すと、気持ちが落ち着きますか。",
+        "そばにいなくなっても、一人の人のことを長く思い続ける方ですか。それとも、次の人をすぐ求めてしまう方ですか。",
+        "好き嫌いが激しい方ですか。",
+        "とてもいい人だと思っていたのに、幻滅したり、嫌いになったりすることがありますか。",
+        "よくイライラしたり、落ち込んだりする方ですか。",
+        "自分にはあまり取り柄がないと思うことがありますか。",
+        "拒絶されるのではないかと、不安になることがありますか。",
+        "良いところより、悪いところの方が気になってしまいますか。",
+        "自分に自信がある方ですか。",
+        "人に頼らずに、決断したり行動したりできる方ですか。",
+        "自分はあまり人から愛されない存在だと思いますか。",
+        "何か嫌なことがあると、引きずってしまう方ですか。",
+        "あなたの親（養育者）から、よく傷つけられるようなことをされましたか。",
+        "あなたの親（養育者）に対して、怒りや恨みを感じることがありますか。",
+        "つらいときに、身近な人に接触を求めるほうですか。それとも、つらいときほど、接触を求めようとしなくなる方ですか。",
+        "親しい対人関係は、あなたにとって重要ですか。",
+        "いつも冷静でクールな方ですか。",
+        "べたべたした付き合いは、苦手ですか。",
+        "関わりのあった人と別れても、すぐ忘れる方ですか。",
+        "人付き合いより、自分の世界が大切ですか。",
+        "自分の力だけが頼りだと思いますか。",
+        "昔のことはあまり懐かしいと思いませんか。",
+        "あまり感情を表情に出さない方ですか。",
+        "恋人や配偶者にも、プライバシーは冒されたくないですか。",
+        "親しい人と肌が触れ合ったり、抱擁したりするスキンシップをとることを好みますか。それとも、あまり好みませんか。",
+        "幼いころのことをよく覚えている方ですか。それとも、あまり記憶がない方ですか。",
+        "親しい人といるときにも、気を遣ってしまう方ですか。",
+        "困っているとき、他人は親切に助けてくれるものだと思いますか。",
+        "他人の善意に気軽にすがる方ですか。",
+        "失敗を恐れて、チャレンジを避けてしまうことがありますか。",
+        "人と別れるとき、とても悲しく感じたり、動揺する方ですか",
+        "他人に煩わされず、一人で自由に生きていくのが好きですか。",
+        "あなたにとって、仕事や学業と、恋愛や対人関係のどちらが重要ですか。",
+        "あなたが傷ついたり、落ち込んでいるとき、他の人になぐさめてもらったり、話を聞いてもらうことは、どれくらい大事ですか。"
+    ];
+
+    // --- State ---
+    let currentStep = 0;
+    let faithAnswers = { EP: 0, NS: 0, ER: 0 }; // Score A (first option)
+    let attachScores = { A: 0, B: 0, C: 0 };
+    const totalSteps = faithQuestions.length + attachmentQuestions.length;
+
+    // --- Controller ---
+    function startDiagnosis() {
+        document.getElementById('screen-start').classList.add('hidden');
+        document.getElementById('screen-question').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const progress = (currentStep / totalSteps) * 100;
+        document.getElementById('progress-inner').style.width = progress + '%';
+
+        const qOptions = document.getElementById('q-options');
+        qOptions.innerHTML = '';
+
+        if (currentStep < faithQuestions.length) {
+            // Part 1: Faith
+            document.getElementById('part-label').innerText = "PART 1: 信心のスタイル";
+            const qData = faithQuestions[currentStep];
+            document.getElementById('q-text').innerText = qData.q;
+            
+            const btnA = document.createElement('button');
+            btnA.innerText = qData.a;
+            btnA.onclick = () => handleFaith(qData.type, 'A');
+            
+            const btnB = document.createElement('button');
+            btnB.innerText = qData.b;
+            btnB.onclick = () => handleFaith(qData.type, 'B');
+            
+            qOptions.appendChild(btnA);
+            qOptions.appendChild(btnB);
+        } else {
+            // Part 2: Attachment
+            document.getElementById('part-label').innerText = "PART 2: 心の土壌（愛着）";
+            const attachIndex = currentStep - faithQuestions.length;
+            document.getElementById('q-text').innerText = attachmentQuestions[attachIndex];
+            
+            const opt1Text = (attachIndex === 12) ? "一人の人を思い続ける" :
+                             (attachIndex === 25) ? "接触を求める" :
+                             (attachIndex === 26) ? "とても重要" :
+                             (attachIndex === 35) ? "好む方だ" :
+                             (attachIndex === 36) ? "よく覚えている" :
+                             (attachIndex === 43) ? "仕事や学業" :
+                             (attachIndex === 44) ? "とても重要" : "はい";
+
+            const opt2Text = (attachIndex === 12) ? "次の人を求める" :
+                             (attachIndex === 25) ? "接触を求めない" :
+                             (attachIndex === 26) ? "あまり重要でない" :
+                             (attachIndex === 35) ? "あまり好まない" :
+                             (attachIndex === 36) ? "あまり記憶がない" :
+                             (attachIndex === 43) ? "恋愛や対人関係" :
+                             (attachIndex === 44) ? "あまり重要でない" : "いいえ";
+
+            const btn1 = document.createElement('button');
+            btn1.innerText = opt1Text;
+            btn1.onclick = () => handleAttach(attachIndex + 1, 1);
+
+            const btn2 = document.createElement('button');
+            btn2.innerText = opt2Text;
+            btn2.onclick = () => handleAttach(attachIndex + 1, 2);
+
+            qOptions.appendChild(btn1);
+            qOptions.appendChild(btn2);
+        }
+    }
+
+    function handleFaith(type, choice) {
+        if (choice === 'A') faithAnswers[type]++;
+        next();
+    }
+
+    function handleAttach(qNum, ansNum) {
+        // Scoring Logic based on the provided table
+        // A: 安定, B: 不安, C: 回避
+        if (qNum === 1 || qNum === 3 || qNum === 4) { if(ansNum === 1) attachScores.A += 1; }
+        if (qNum === 2) { if(ansNum === 1) attachScores.A += 1; if(ansNum === 2) attachScores.C += 2; }
+        if (qNum >= 5 && qNum <= 9) { if(ansNum === 2) attachScores.A += 2; }
+        if (qNum >= 10 && qNum <= 13) { if(ansNum === 1) attachScores.A += 1; if(ansNum === 2) attachScores.B += 2; }
+        if (qNum >= 14 && qNum <= 19) { if(ansNum === 1) attachScores.B += 1; }
+        if (qNum === 20 || qNum === 21) { if(ansNum === 2) attachScores.B += 2; }
+        if (qNum >= 22 && qNum <= 25) { if(ansNum === 2) attachScores.A += 2; if(ansNum === 1) attachScores.B += 1; }
+        if (qNum === 26 || qNum === 27) { if(ansNum === 2) attachScores.C += 2; }
+        if (qNum >= 28 && qNum <= 35) { if(ansNum === 1) attachScores.C += 1; }
+        if (qNum === 36) { if(ansNum === 2) attachScores.C += 2; }
+        if (qNum === 37) { if(ansNum === 2) attachScores.C += 1; }
+        if (qNum === 38) { if(ansNum === 2) attachScores.A += 2; if(ansNum === 1) attachScores.B += 1; }
+        if (qNum === 39 || qNum === 40) { if(ansNum === 1) attachScores.A += 1; if(ansNum === 2) attachScores.C += 2; }
+        if (qNum === 41) { if(ansNum === 1) attachScores.C += 1; }
+        if (qNum === 42) { if(ansNum === 1) attachScores.B += 1; if(ansNum === 2) attachScores.C += 2; }
+        if (qNum === 43) { if(ansNum === 1) attachScores.C += 1; if(ansNum === 2) attachScores.B += 2; }
+        if (qNum === 44) { if(ansNum === 1) attachScores.C += 1; if(ansNum === 2) attachScores.B += 2; }
+        if (qNum === 45) { if(ansNum === 2) attachScores.C += 2; }
+
+        next();
+    }
+
+    function next() {
+        currentStep++;
+        if (currentStep < totalSteps) {
+            showQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('screen-question').classList.add('hidden');
+        document.getElementById('screen-result').classList.remove('hidden');
+
+        // Part 1 Result
+        const char1 = faithAnswers.EP >= 3 ? 'E' : 'P';
+        const char2 = faithAnswers.NS >= 3 ? 'N' : 'S';
+        const char3 = faithAnswers.ER >= 3 ? 'E' : 'R';
+
+        // Part 2 Result (Logic provided in判定表)
+        let char4 = 'S';
+        let detail4 = "安定型 (Secure)";
+        
+        const {A, B, C} = attachScores;
+        if (B > A && C > A) {
+            char4 = 'D';
+            detail4 = "恐れ・回避型 (Disorganized)";
+        } else if (B >= C && B > A) {
+            char4 = 'X';
+            detail4 = "不安型 (AnXious)";
+        } else if (C >= B && C > A) {
+            char4 = 'A';
+            detail4 = "回避型 (Avoidant)";
+        } else {
+            char4 = 'S';
+            detail4 = "安定型 (Secure)";
+        }
+
+        const finalCode = `${char1}${char2}${char3}-${char4}`;
+        document.getElementById('res-code').innerText = finalCode;
+
+        const details = [
+            { label: "信心への向き合い方", val: char1 === 'E' ? "委ねる型 (Entrust)" : "探求する型 (Pursue)" },
+            { label: "過去の物語", val: char2 === 'N' ? "逆境からの転換型 (Nadir)" : "穏やかな積み重ね型 (Serene)" },
+            { label: "表現スタイル", val: char3 === 'E' ? "外向・表出型 (Expressive)" : "内向・受容型 (Receptive)" },
+            { label: "心の土壌（愛着）", val: detail4 }
+        ];
+
+        let html = '';
+        details.forEach(d => {
+            html += `<div class="result-item"><div class="result-label">${d.label}</div><div>${d.val}</div></div>`;
+        });
+        document.getElementById('res-details').innerHTML = html;
+    }
+
+    function copyResult() {
+        const code = document.getElementById('res-code').innerText;
+        const details = document.getElementById('res-details').innerText;
+        const text = `【NBTI診断結果】\nあなたのコード: ${code}\n\n${details}\n#LSC2026 #NBTI #金光教フォーゲル`;
+        
+        navigator.clipboard.writeText(text).then(() => {
+            alert("結果をクリップボードにコピーしました！");
+        });
+    }
+</script>
+
+</body>
+</html>
