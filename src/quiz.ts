@@ -45,37 +45,37 @@ export const totalQuestions = questionOrder.length;
 function buildQuestionBlocks(): QuestionBlock[] {
   return [
     {
-      title: "愛着タイプ 1",
+      title: "愛着スタイル 1",
       questions: attachmentQuestions
         .slice(0, 15)
         .map((_, index) => ({ kind: "attachment", index })),
     },
     {
-      title: "信心への向き合い方",
+      title: "信心スタイル",
       questions: faithQuestions
         .slice(0, 5)
         .map((_, index) => ({ kind: "faith", index })),
     },
     {
-      title: "愛着タイプ 2",
+      title: "愛着スタイル 2",
       questions: attachmentQuestions
         .slice(15, 30)
         .map((_, index) => ({ kind: "attachment", index: index + 15 })),
     },
     {
-      title: "過去の物語",
+      title: "人生スタイル",
       questions: faithQuestions
         .slice(5, 10)
         .map((_, index) => ({ kind: "faith", index: index + 5 })),
     },
     {
-      title: "愛着タイプ 3",
+      title: "愛着スタイル 3",
       questions: attachmentQuestions
         .slice(30, 45)
         .map((_, index) => ({ kind: "attachment", index: index + 30 })),
     },
     {
-      title: "人との関わり方",
+      title: "関わりスタイル",
       questions: faithQuestions
         .slice(10, 15)
         .map((_, index) => ({ kind: "faith", index: index + 10 })),

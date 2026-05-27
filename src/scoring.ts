@@ -129,39 +129,33 @@ export const buildResult = (
 
   const { A, B, C } = attachmentScores;
   let char4 = "S";
-  let attachmentLabel = "安定型 (Secure)";
+  let attachmentLabel = "S（安定型）";
 
   if (B > A && C > A) {
     char4 = "D";
-    attachmentLabel = "恐れ・回避型 (Disorganized)";
+    attachmentLabel = "D（混乱型）";
   } else if (B >= C && B > A) {
     char4 = "X";
-    attachmentLabel = "不安型 (AnXious)";
+    attachmentLabel = "X（不安型）";
   } else if (C >= B && C > A) {
     char4 = "A";
-    attachmentLabel = "回避型 (Avoidant)";
+    attachmentLabel = "A（回避型）";
   }
 
   const code = `${char4}-${char1}${char2}${char3}`;
   const details: ResultDetail[] = [
-    { label: "愛着タイプ", value: attachmentLabel },
+    { label: "愛着スタイル", value: attachmentLabel },
     {
-      label: "信心への向き合い方",
-      value: char1 === "E" ? "委ねる型 (Entrust)" : "探求する型 (Pursue)",
+      label: "信心スタイル",
+      value: char1 === "E" ? "E（委ねる）" : "P（探求する）",
     },
     {
-      label: "過去の物語",
-      value:
-        char2 === "N"
-          ? "逆境からの転換型 (Nadir)"
-          : "穏やかな積み重ね型 (Serene)",
+      label: "人生スタイル",
+      value: char2 === "N" ? "N（起伏）" : "S（平穏）",
     },
     {
-      label: "人との関わり方",
-      value:
-        char3 === "E"
-          ? "外向・表出型 (Expressive)"
-          : "内向・受容型 (Receptive)",
+      label: "関わりスタイル",
+      value: char3 === "E" ? "E（表現）" : "R（受容）",
     },
   ];
 
