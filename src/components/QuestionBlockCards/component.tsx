@@ -1,4 +1,4 @@
-import type { MutableRefObject } from "react";
+import type { CSSProperties, MutableRefObject } from "react";
 import { DiagnosisCard } from "../DiagnosisCard/component";
 import {
   getQuestionGlobalIndex,
@@ -14,7 +14,10 @@ type QuestionBlockCardsProps = {
   blockIndex: number;
   selectedAnswers: SelectedAnswerMap;
   isActiveBlock: boolean;
-  cardRefs: MutableRefObject<Array<HTMLDivElement | null>>;
+  activeGlobalIndex: number;
+  transitionTargetIndex: number | null;
+  visualFocusIndex: number;
+  cardRefs: MutableRefObject<Array<HTMLElement | null>>;
   onAnswer: (
     globalIndex: number,
     blockQuestionIndex: number,
@@ -27,6 +30,9 @@ export function QuestionBlockCards({
   blockIndex,
   selectedAnswers,
   isActiveBlock,
+  activeGlobalIndex,
+  transitionTargetIndex,
+  visualFocusIndex,
   cardRefs,
   onAnswer,
 }: QuestionBlockCardsProps) {
@@ -52,19 +58,44 @@ export function QuestionBlockCards({
         const globalIndex = getQuestionGlobalIndex(blockIndex, index);
         const preview = getQuestionPreview(globalIndex);
         const selectedIndex = selectedAnswers[globalIndex];
+        const rawRelativePosition = globalIndex - visualFocusIndex;
+        const relativePosition = Math.max(
+          -2,
+          Math.min(2, rawRelativePosition),
+        );
+        const isActiveQuestion = Math.abs(rawRelativePosition) < 0.001;
+        const isStoredActiveQuestion = globalIndex === activeGlobalIndex;
+        const isTransitionTarget = globalIndex === transitionTargetIndex;
+        const shouldShowCard =
+          isActiveBlock || isStoredActiveQuestion || isTransitionTarget;
+        const cardDepth = Math.abs(relativePosition);
+        const cardScale = 1 - 0.075 * cardDepth;
         if (!preview) return null;
 
         return (
           <article
-            className="block-card current-card"
+            className={`block-card current-card ${
+              isActiveQuestion
+                ? "is-active-question"
+                : relativePosition < 0
+                  ? "is-before-question"
+                  : "is-after-question"
+            }${shouldShowCard ? "" : " is-hidden-block-card"}`}
+            style={
+              {
+                "--card-offset": relativePosition,
+                "--card-depth": cardDepth,
+                "--card-scale": cardScale,
+              } as CSSProperties
+            }
             key={globalIndex}
             aria-hidden={!isActiveBlock}
+            ref={(el) => {
+              cardRefs.current[globalIndex] = el;
+            }}
           >
             <div
               className="block-question-card"
-              ref={(el) => {
-                cardRefs.current[globalIndex] = el;
-              }}
               style={{
                 width: "100%",
                 display: "flex",
