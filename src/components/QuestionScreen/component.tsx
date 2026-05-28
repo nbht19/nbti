@@ -22,8 +22,11 @@ export function QuestionScreen(props: QuestionScreenProps) {
   } = props;
   const {
     activeGlobalIndex,
+    canGoNextBlockDirectly,
     cardRefs,
     handleBack,
+    handleStartSynthesis,
+    handleGoNextBlock,
     handleQuestionAnswer,
     handleTouchEnd,
     handleTouchMove,
@@ -37,7 +40,9 @@ export function QuestionScreen(props: QuestionScreenProps) {
       <QuestionHeader
         currentBlockNumber={currentStep + 1}
         canGoBack={canGoBack}
+        canGoForward={canGoNextBlockDirectly}
         onBack={handleBack}
+        onForward={handleGoNextBlock}
       />
       <div className="question-stack">
         <div
@@ -58,6 +63,7 @@ export function QuestionScreen(props: QuestionScreenProps) {
                 transitionTargetIndex={transitionTargetIndex}
                 cardRefs={cardRefs}
                 onAnswer={handleQuestionAnswer}
+                onSynthesis={handleStartSynthesis}
                 key={blockIndex}
               />
             ))}

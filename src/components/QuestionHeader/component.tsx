@@ -5,20 +5,42 @@ import "./style.css";
 type QuestionHeaderProps = {
   currentBlockNumber: number;
   canGoBack: boolean;
+  canGoForward: boolean;
   onBack: () => void;
+  onForward: () => void;
 };
 
 export function QuestionHeader({
   currentBlockNumber,
   canGoBack,
+  canGoForward,
   onBack,
+  onForward,
 }: QuestionHeaderProps) {
   return (
     <div className="question-header">
       <div className="step-row">
+        <Button
+          className="nav-button"
+          variant="outline"
+          type="button"
+          onClick={onBack}
+          disabled={!canGoBack}
+        >
+          前のブロック
+        </Button>
         <Text as="span" className="block-count">
           BLOCK {currentBlockNumber} / {totalSteps}
         </Text>
+        <Button
+          className="nav-button"
+          variant="outline"
+          type="button"
+          onClick={onForward}
+          disabled={!canGoForward}
+        >
+          次のブロック
+        </Button>
       </div>
       <div
         className="block-progress"
@@ -37,15 +59,6 @@ export function QuestionHeader({
           />
         ))}
       </div>
-      <Button
-        className="back-button"
-        variant="outline"
-        type="button"
-        onClick={onBack}
-        disabled={!canGoBack}
-      >
-        戻る
-      </Button>
     </div>
   );
 }

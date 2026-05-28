@@ -3,6 +3,7 @@ import type { TouchEvent, WheelEvent } from "react";
 import {
   getQuestionGlobalIndex,
   questionBlocks,
+  totalQuestions,
   totalSteps,
   type CardScrollMode,
   type SelectedAnswerMap,
@@ -10,8 +11,9 @@ import {
 
 const scrollAnimationDurationMs = 860;
 const blockBackOverlapMs = 110;
+const blockForwardOverlapMs = 110;
 const answerAdvanceDelayMs = 45;
-const answerClickLockMs = 320;
+const answerClickLockMs = scrollAnimationDurationMs;
 
 type UseQuestionScreenParams = {
   currentStep: number;
@@ -132,6 +134,15 @@ export function useQuestionScreen({
 
   const currentBlock = questionBlocks[currentStep];
   const currentBlockStartIndex = getQuestionGlobalIndex(currentStep, 0);
+  const currentBlockEndIndex =
+    currentBlockStartIndex + currentBlock.questions.length - 1;
+  const isCurrentBlockComplete = currentBlock.questions.every((_, index) => {
+    const questionGlobalIndex = getQuestionGlobalIndex(currentStep, index);
+
+    return selectedAnswers[questionGlobalIndex] !== undefined;
+  });
+  const canGoNextBlockDirectly =
+    currentStep < totalSteps - 1 && isCurrentBlockComplete;
 
   const updateCardVisuals = (focusIndex: number) => {
     cardRefs.current.forEach((card, globalIndex) => {
@@ -173,9 +184,6 @@ export function useQuestionScreen({
   }, [currentBlock.questions.length, currentStep, startAtEnd]);
 
   useLayoutEffect(() => {
-    const currentBlockEndIndex =
-      currentBlockStartIndex + currentBlock.questions.length - 1;
-
     if (
       activeGlobalIndex < currentBlockStartIndex ||
       activeGlobalIndex > currentBlockEndIndex
@@ -215,9 +223,14 @@ export function useQuestionScreen({
       previousBlock.questions.length - 1,
     );
     const currentFirstGlobalIndex = currentBlockStartIndex;
+    const isAtCurrentFirstQuestion =
+      targetGlobalIndexRef.current === currentFirstGlobalIndex;
 
     isAnimatingScrollRef.current = true;
-    animateToQuestion(currentFirstGlobalIndex);
+
+    if (!isAtCurrentFirstQuestion) {
+      animateToQuestion(currentFirstGlobalIndex);
+    }
 
     window.setTimeout(() => {
       animateToQuestion(previousGlobalIndex);
@@ -225,7 +238,34 @@ export function useQuestionScreen({
       window.setTimeout(() => {
         onBack();
       }, scrollAnimationDurationMs);
-    }, scrollAnimationDurationMs - blockBackOverlapMs);
+    }, isAtCurrentFirstQuestion ? 0 : scrollAnimationDurationMs - blockBackOverlapMs);
+  };
+
+  const handleGoNextBlock = () => {
+    if (!canGoNextBlockDirectly || isAnimatingScrollRef.current) return;
+
+    const currentLastGlobalIndex = currentBlockEndIndex;
+    const nextGlobalIndex = getQuestionGlobalIndex(currentStep + 1, 0);
+    const isAtCurrentLastQuestion =
+      targetGlobalIndexRef.current === currentLastGlobalIndex;
+
+    if (!isAtCurrentLastQuestion) {
+      animateToQuestion(currentLastGlobalIndex);
+    }
+
+    window.setTimeout(() => {
+      animateToQuestion(nextGlobalIndex);
+
+      window.setTimeout(() => {
+        onNext();
+      }, scrollAnimationDurationMs);
+    }, isAtCurrentLastQuestion ? 0 : scrollAnimationDurationMs - blockForwardOverlapMs);
+  };
+
+  const handleStartSynthesis = () => {
+    if (activeGlobalIndex !== totalQuestions) return;
+
+    onNext();
   };
 
   const animateToQuestion = (globalIndex: number) => {
@@ -263,10 +303,7 @@ export function useQuestionScreen({
     const index = targetGlobalIndexRef.current - currentBlockStartIndex;
     const minIndex = 0;
     const maxIndex = currentBlock.questions.length - 1;
-    const nextIndex = Math.min(
-      Math.max(index + direction, minIndex),
-      maxIndex,
-    );
+    const nextIndex = Math.min(Math.max(index + direction, minIndex), maxIndex);
 
     if (nextIndex === index) return;
 
@@ -288,7 +325,11 @@ export function useQuestionScreen({
     return () => {
       scrollElement.removeEventListener("wheel", handler);
     };
-  }, [activeGlobalIndex, currentBlock.questions.length, currentBlockStartIndex]);
+  }, [
+    activeGlobalIndex,
+    currentBlock.questions.length,
+    currentBlockStartIndex,
+  ]);
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     touchStartYRef.current = event.touches[0]?.clientY ?? null;
@@ -338,15 +379,15 @@ export function useQuestionScreen({
       const nextGlobalIndex =
         nextBlockIndex < totalSteps
           ? getQuestionGlobalIndex(nextBlockIndex, 0)
-          : null;
+          : totalQuestions;
 
-      if (nextGlobalIndex !== null) {
-        animateToQuestion(nextGlobalIndex);
+      animateToQuestion(nextGlobalIndex);
+
+      if (nextBlockIndex < totalSteps) {
+        window.setTimeout(() => {
+          onNext();
+        }, scrollAnimationDurationMs);
       }
-
-      window.setTimeout(() => {
-        onNext();
-      }, 880);
       return;
     }
 
@@ -375,8 +416,11 @@ export function useQuestionScreen({
 
   return {
     activeGlobalIndex,
+    canGoNextBlockDirectly,
     cardRefs,
     handleBack,
+    handleGoNextBlock,
+    handleStartSynthesis,
     handleQuestionAnswer,
     handleTouchEnd,
     handleTouchMove,
