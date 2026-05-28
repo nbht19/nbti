@@ -3,7 +3,6 @@ import type { TouchEvent, WheelEvent } from "react";
 import {
   getQuestionGlobalIndex,
   questionBlocks,
-  totalQuestions,
   totalSteps,
   type CardScrollMode,
   type SelectedAnswerMap,
@@ -11,6 +10,8 @@ import {
 
 const scrollAnimationDurationMs = 860;
 const blockBackOverlapMs = 110;
+const answerAdvanceDelayMs = 45;
+const answerClickLockMs = 320;
 
 type UseQuestionScreenParams = {
   currentStep: number;
@@ -118,7 +119,9 @@ export function useQuestionScreen({
   const [activeGlobalIndex, setActiveGlobalIndex] = useState(0);
   const isAnimatingScrollRef = useRef(false);
   const animationTokenRef = useRef(0);
+  const answerClickLockRef = useRef(false);
   const skipNextScrollEffectRef = useRef(false);
+  const targetGlobalIndexRef = useRef(0);
   const visualFocusIndexRef = useRef(0);
   const [transitionTargetIndex, setTransitionTargetIndex] = useState<
     number | null
@@ -127,8 +130,6 @@ export function useQuestionScreen({
   const nextScrollBehaviorRef = useRef<ScrollBehavior | "custom">("auto");
   const { cardRefs, scrollRef, scrollToCard } = useCardScroller();
 
-  const currentQuestionNumber = activeGlobalIndex + 1;
-  const progress = (currentQuestionNumber / totalQuestions) * 100;
   const currentBlock = questionBlocks[currentStep];
   const currentBlockStartIndex = getQuestionGlobalIndex(currentStep, 0);
 
@@ -163,6 +164,7 @@ export function useQuestionScreen({
       startAtEnd ? currentBlock.questions.length - 1 : 0,
     );
     setActiveGlobalIndex(nextActiveIndex);
+    targetGlobalIndexRef.current = nextActiveIndex;
     visualFocusIndexRef.current = nextActiveIndex;
     updateCardVisuals(nextActiveIndex);
     window.scrollTo({ left: 0, top: window.scrollY });
@@ -187,6 +189,7 @@ export function useQuestionScreen({
     }
 
     scrollToCard(activeGlobalIndex, nextScrollBehaviorRef.current);
+    targetGlobalIndexRef.current = activeGlobalIndex;
     visualFocusIndexRef.current = activeGlobalIndex;
     updateCardVisuals(activeGlobalIndex);
     nextScrollBehaviorRef.current = "auto";
@@ -228,6 +231,7 @@ export function useQuestionScreen({
   const animateToQuestion = (globalIndex: number) => {
     const animationToken = animationTokenRef.current + 1;
     animationTokenRef.current = animationToken;
+    targetGlobalIndexRef.current = globalIndex;
     const startFocusIndex = visualFocusIndexRef.current;
     const focusDistance = globalIndex - startFocusIndex;
     isAnimatingScrollRef.current = true;
@@ -256,9 +260,7 @@ export function useQuestionScreen({
   };
 
   const moveActiveQuestion = (direction: 1 | -1) => {
-    if (isAnimatingScrollRef.current) return;
-
-    const index = activeGlobalIndex - currentBlockStartIndex;
+    const index = targetGlobalIndexRef.current - currentBlockStartIndex;
     const minIndex = 0;
     const maxIndex = currentBlock.questions.length - 1;
     const nextIndex = Math.min(
@@ -314,6 +316,13 @@ export function useQuestionScreen({
     blockQuestionIndex: number,
     choice: 0 | 1,
   ) => {
+    if (answerClickLockRef.current) return;
+
+    answerClickLockRef.current = true;
+    window.setTimeout(() => {
+      answerClickLockRef.current = false;
+    }, answerClickLockMs);
+
     const nextAnswers = { ...selectedAnswers, [globalIndex]: choice };
     const isLastQuestion =
       blockQuestionIndex === currentBlock.questions.length - 1;
@@ -355,25 +364,23 @@ export function useQuestionScreen({
       if (firstUnansweredIndex !== -1) {
         window.setTimeout(() => {
           animateToQuestion(currentBlockStartIndex + firstUnansweredIndex);
-        }, 120);
+        }, answerAdvanceDelayMs);
       }
 
       return;
     }
 
-    window.setTimeout(() => moveActiveQuestion(1), 120);
+    window.setTimeout(() => moveActiveQuestion(1), answerAdvanceDelayMs);
   };
 
   return {
     activeGlobalIndex,
     cardRefs,
-    currentQuestionNumber,
     handleBack,
     handleQuestionAnswer,
     handleTouchEnd,
     handleTouchMove,
     handleTouchStart,
-    progress,
     scrollRef,
     transitionTargetIndex,
   };

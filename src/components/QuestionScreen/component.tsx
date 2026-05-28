@@ -23,13 +23,11 @@ export function QuestionScreen(props: QuestionScreenProps) {
   const {
     activeGlobalIndex,
     cardRefs,
-    currentQuestionNumber,
     handleBack,
     handleQuestionAnswer,
     handleTouchEnd,
     handleTouchMove,
     handleTouchStart,
-    progress,
     scrollRef,
     transitionTargetIndex,
   } = useQuestionScreen(props);
@@ -37,8 +35,7 @@ export function QuestionScreen(props: QuestionScreenProps) {
   return (
     <section className="question-stage">
       <QuestionHeader
-        currentQuestionNumber={currentQuestionNumber}
-        progress={progress}
+        currentBlockNumber={currentStep + 1}
         canGoBack={canGoBack}
         onBack={handleBack}
       />
