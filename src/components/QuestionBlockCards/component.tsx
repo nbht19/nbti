@@ -16,7 +16,6 @@ type QuestionBlockCardsProps = {
   isActiveBlock: boolean;
   activeGlobalIndex: number;
   transitionTargetIndex: number | null;
-  visualFocusIndex: number;
   cardRefs: MutableRefObject<Array<HTMLElement | null>>;
   onAnswer: (
     globalIndex: number,
@@ -32,7 +31,6 @@ export function QuestionBlockCards({
   isActiveBlock,
   activeGlobalIndex,
   transitionTargetIndex,
-  visualFocusIndex,
   cardRefs,
   onAnswer,
 }: QuestionBlockCardsProps) {
@@ -58,7 +56,7 @@ export function QuestionBlockCards({
         const globalIndex = getQuestionGlobalIndex(blockIndex, index);
         const preview = getQuestionPreview(globalIndex);
         const selectedIndex = selectedAnswers[globalIndex];
-        const rawRelativePosition = globalIndex - visualFocusIndex;
+        const rawRelativePosition = globalIndex - activeGlobalIndex;
         const relativePosition = Math.max(
           -2,
           Math.min(2, rawRelativePosition),

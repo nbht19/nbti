@@ -116,7 +116,6 @@ export function useQuestionScreen({
   onNext,
 }: UseQuestionScreenParams) {
   const [activeGlobalIndex, setActiveGlobalIndex] = useState(0);
-  const [visualFocusIndex, setVisualFocusIndex] = useState(0);
   const isAnimatingScrollRef = useRef(false);
   const animationTokenRef = useRef(0);
   const skipNextScrollEffectRef = useRef(false);
@@ -133,14 +132,39 @@ export function useQuestionScreen({
   const currentBlock = questionBlocks[currentStep];
   const currentBlockStartIndex = getQuestionGlobalIndex(currentStep, 0);
 
+  const updateCardVisuals = (focusIndex: number) => {
+    cardRefs.current.forEach((card, globalIndex) => {
+      if (!card) return;
+
+      const rawRelativePosition = globalIndex - focusIndex;
+      const relativePosition = Math.max(-2, Math.min(2, rawRelativePosition));
+      const cardDepth = Math.abs(relativePosition);
+      const cardScale = 1 - 0.075 * cardDepth;
+      const isActiveQuestion = Math.abs(rawRelativePosition) < 0.001;
+
+      card.style.setProperty("--card-offset", String(relativePosition));
+      card.style.setProperty("--card-depth", String(cardDepth));
+      card.style.setProperty("--card-scale", String(cardScale));
+      card.classList.toggle("is-active-question", isActiveQuestion);
+      card.classList.toggle(
+        "is-before-question",
+        !isActiveQuestion && relativePosition < 0,
+      );
+      card.classList.toggle(
+        "is-after-question",
+        !isActiveQuestion && relativePosition >= 0,
+      );
+    });
+  };
+
   useEffect(() => {
     const nextActiveIndex = getQuestionGlobalIndex(
       currentStep,
       startAtEnd ? currentBlock.questions.length - 1 : 0,
     );
     setActiveGlobalIndex(nextActiveIndex);
-    setVisualFocusIndex(nextActiveIndex);
     visualFocusIndexRef.current = nextActiveIndex;
+    updateCardVisuals(nextActiveIndex);
     window.scrollTo({ left: 0, top: window.scrollY });
     document.documentElement.scrollLeft = 0;
     document.body.scrollLeft = 0;
@@ -163,8 +187,8 @@ export function useQuestionScreen({
     }
 
     scrollToCard(activeGlobalIndex, nextScrollBehaviorRef.current);
-    setVisualFocusIndex(activeGlobalIndex);
     visualFocusIndexRef.current = activeGlobalIndex;
+    updateCardVisuals(activeGlobalIndex);
     nextScrollBehaviorRef.current = "auto";
   }, [
     activeGlobalIndex,
@@ -214,14 +238,14 @@ export function useQuestionScreen({
         startFocusIndex + focusDistance * scrollProgress;
 
       visualFocusIndexRef.current = nextVisualFocusIndex;
-      setVisualFocusIndex(nextVisualFocusIndex);
+      updateCardVisuals(nextVisualFocusIndex);
     });
 
     window.setTimeout(() => {
       if (animationTokenRef.current !== animationToken) return;
       setActiveGlobalIndex(globalIndex);
-      setVisualFocusIndex(globalIndex);
       visualFocusIndexRef.current = globalIndex;
+      updateCardVisuals(globalIndex);
       isAnimatingScrollRef.current = false;
     }, scrollAnimationDurationMs);
 
@@ -352,6 +376,5 @@ export function useQuestionScreen({
     progress,
     scrollRef,
     transitionTargetIndex,
-    visualFocusIndex,
   };
 }
