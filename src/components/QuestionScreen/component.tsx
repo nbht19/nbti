@@ -21,6 +21,7 @@ export function QuestionScreen(props: QuestionScreenProps) {
     canGoBack,
   } = props;
   const {
+    activeGlobalIndex,
     cardRefs,
     currentQuestionNumber,
     handleBack,
@@ -29,6 +30,8 @@ export function QuestionScreen(props: QuestionScreenProps) {
     handleTouchStart,
     progress,
     scrollRef,
+    transitionTargetIndex,
+    visualFocusIndex,
   } = useQuestionScreen(props);
 
   return (
@@ -53,6 +56,9 @@ export function QuestionScreen(props: QuestionScreenProps) {
                 blockIndex={blockIndex}
                 selectedAnswers={selectedAnswers}
                 isActiveBlock={blockIndex === currentStep}
+                activeGlobalIndex={activeGlobalIndex}
+                transitionTargetIndex={transitionTargetIndex}
+                visualFocusIndex={visualFocusIndex}
                 cardRefs={cardRefs}
                 onAnswer={handleQuestionAnswer}
                 key={blockIndex}

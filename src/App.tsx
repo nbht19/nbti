@@ -1,4 +1,5 @@
 import { QuestionScreen } from "./components/QuestionScreen/component";
+import { RandomTheme } from "./components/RandomTheme/component";
 import { ResultScreen } from "./components/ResultScreen/component";
 import { StartScreen } from "./components/StartScreen/component";
 import { SynthesisScreen } from "./components/SynthesisScreen/component";
@@ -29,6 +30,8 @@ function App() {
           : ""
       }${screen === "startTransition" ? " is-start-transitioning" : ""}`}
     >
+      <RandomTheme />
+
       {(screen === "start" || screen === "startTransition") && (
         <StartScreen
           isTransitioning={screen === "startTransition"}

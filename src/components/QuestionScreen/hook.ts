@@ -9,6 +9,9 @@ import {
   type SelectedAnswerMap,
 } from "../../quiz";
 
+const scrollAnimationDurationMs = 860;
+const blockBackOverlapMs = 110;
+
 type UseQuestionScreenParams = {
   currentStep: number;
   selectedAnswers: SelectedAnswerMap;
@@ -21,10 +24,14 @@ type UseQuestionScreenParams = {
 
 function useCardScroller() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const cardRefs = useRef<Array<HTMLElement | null>>([]);
   const scrollAnimationRef = useRef<number | null>(null);
 
-  const scrollToCard = (globalIndex: number, behavior: CardScrollMode) => {
+  const scrollToCard = (
+    globalIndex: number,
+    behavior: CardScrollMode,
+    onProgress?: (progress: number) => void,
+  ) => {
     const scrollElement = scrollRef.current;
     const card = cardRefs.current[globalIndex];
 
@@ -52,6 +59,7 @@ function useCardScroller() {
 
     if (behavior !== "custom") {
       scrollElement.scrollTo({ left, top, behavior });
+      onProgress?.(1);
       return;
     }
 
@@ -59,7 +67,7 @@ function useCardScroller() {
     const startTop = scrollElement.scrollTop;
     const distanceLeft = left - startLeft;
     const distanceTop = top - startTop;
-    const duration = 860;
+    const duration = scrollAnimationDurationMs;
     const startTime = performance.now();
     const easeOutCubic = (value: number) => 1 - (1 - value) ** 3;
 
@@ -67,6 +75,8 @@ function useCardScroller() {
       const elapsed = time - startTime;
       const progressValue = Math.min(elapsed / duration, 1);
       const eased = easeOutCubic(progressValue);
+
+      onProgress?.(eased);
 
       scrollElement.scrollTo({
         left: startLeft + distanceLeft * eased,
@@ -106,7 +116,14 @@ export function useQuestionScreen({
   onNext,
 }: UseQuestionScreenParams) {
   const [activeGlobalIndex, setActiveGlobalIndex] = useState(0);
+  const [visualFocusIndex, setVisualFocusIndex] = useState(0);
   const isAnimatingScrollRef = useRef(false);
+  const animationTokenRef = useRef(0);
+  const skipNextScrollEffectRef = useRef(false);
+  const visualFocusIndexRef = useRef(0);
+  const [transitionTargetIndex, setTransitionTargetIndex] = useState<
+    number | null
+  >(null);
   const touchStartYRef = useRef<number | null>(null);
   const nextScrollBehaviorRef = useRef<ScrollBehavior | "custom">("auto");
   const { cardRefs, scrollRef, scrollToCard } = useCardScroller();
@@ -117,12 +134,13 @@ export function useQuestionScreen({
   const currentBlockStartIndex = getQuestionGlobalIndex(currentStep, 0);
 
   useEffect(() => {
-    setActiveGlobalIndex(
-      getQuestionGlobalIndex(
-        currentStep,
-        startAtEnd ? currentBlock.questions.length - 1 : 0,
-      ),
+    const nextActiveIndex = getQuestionGlobalIndex(
+      currentStep,
+      startAtEnd ? currentBlock.questions.length - 1 : 0,
     );
+    setActiveGlobalIndex(nextActiveIndex);
+    setVisualFocusIndex(nextActiveIndex);
+    visualFocusIndexRef.current = nextActiveIndex;
     window.scrollTo({ left: 0, top: window.scrollY });
     document.documentElement.scrollLeft = 0;
     document.body.scrollLeft = 0;
@@ -139,7 +157,14 @@ export function useQuestionScreen({
       return;
     }
 
+    if (skipNextScrollEffectRef.current) {
+      skipNextScrollEffectRef.current = false;
+      return;
+    }
+
     scrollToCard(activeGlobalIndex, nextScrollBehaviorRef.current);
+    setVisualFocusIndex(activeGlobalIndex);
+    visualFocusIndexRef.current = activeGlobalIndex;
     nextScrollBehaviorRef.current = "auto";
   }, [
     activeGlobalIndex,
@@ -165,40 +190,61 @@ export function useQuestionScreen({
     const currentFirstGlobalIndex = currentBlockStartIndex;
 
     isAnimatingScrollRef.current = true;
-    scrollToCard(currentFirstGlobalIndex, "smooth");
+    animateToQuestion(currentFirstGlobalIndex);
 
     window.setTimeout(() => {
-      scrollToCard(previousGlobalIndex, "custom");
+      animateToQuestion(previousGlobalIndex);
 
       window.setTimeout(() => {
-        isAnimatingScrollRef.current = false;
         onBack();
-      }, 880);
-    }, 430);
+      }, scrollAnimationDurationMs);
+    }, scrollAnimationDurationMs - blockBackOverlapMs);
+  };
+
+  const animateToQuestion = (globalIndex: number) => {
+    const animationToken = animationTokenRef.current + 1;
+    animationTokenRef.current = animationToken;
+    const startFocusIndex = visualFocusIndexRef.current;
+    const focusDistance = globalIndex - startFocusIndex;
+    isAnimatingScrollRef.current = true;
+    skipNextScrollEffectRef.current = true;
+    setTransitionTargetIndex(globalIndex);
+    scrollToCard(globalIndex, "custom", (scrollProgress) => {
+      const nextVisualFocusIndex =
+        startFocusIndex + focusDistance * scrollProgress;
+
+      visualFocusIndexRef.current = nextVisualFocusIndex;
+      setVisualFocusIndex(nextVisualFocusIndex);
+    });
+
+    window.setTimeout(() => {
+      if (animationTokenRef.current !== animationToken) return;
+      setActiveGlobalIndex(globalIndex);
+      setVisualFocusIndex(globalIndex);
+      visualFocusIndexRef.current = globalIndex;
+      isAnimatingScrollRef.current = false;
+    }, scrollAnimationDurationMs);
+
+    window.setTimeout(() => {
+      if (animationTokenRef.current !== animationToken) return;
+      setTransitionTargetIndex(null);
+    }, scrollAnimationDurationMs + 160);
   };
 
   const moveActiveQuestion = (direction: 1 | -1) => {
     if (isAnimatingScrollRef.current) return;
 
-    setActiveGlobalIndex((globalIndex) => {
-      const index = globalIndex - currentBlockStartIndex;
-      const minIndex = 0;
-      const maxIndex = currentBlock.questions.length - 1;
-      const nextIndex = Math.min(
-        Math.max(index + direction, minIndex),
-        maxIndex,
-      );
+    const index = activeGlobalIndex - currentBlockStartIndex;
+    const minIndex = 0;
+    const maxIndex = currentBlock.questions.length - 1;
+    const nextIndex = Math.min(
+      Math.max(index + direction, minIndex),
+      maxIndex,
+    );
 
-      if (nextIndex !== index) {
-        nextScrollBehaviorRef.current = "smooth";
-        isAnimatingScrollRef.current = true;
-        window.setTimeout(() => {
-          isAnimatingScrollRef.current = false;
-        }, 420);
-      }
+    if (nextIndex === index) return;
 
-      return currentBlockStartIndex + nextIndex;
-    });
+    animateToQuestion(currentBlockStartIndex + nextIndex);
   };
 
   useEffect(() => {
@@ -216,7 +262,7 @@ export function useQuestionScreen({
     return () => {
       scrollElement.removeEventListener("wheel", handler);
     };
-  }, [currentBlock.questions.length, currentBlockStartIndex]);
+  }, [activeGlobalIndex, currentBlock.questions.length, currentBlockStartIndex]);
 
   const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     touchStartYRef.current = event.touches[0]?.clientY ?? null;
@@ -258,11 +304,10 @@ export function useQuestionScreen({
           : null;
 
       if (nextGlobalIndex !== null) {
-        scrollToCard(nextGlobalIndex, "custom");
+        animateToQuestion(nextGlobalIndex);
       }
 
       window.setTimeout(() => {
-        setActiveGlobalIndex(nextGlobalIndex ?? activeGlobalIndex);
         onNext();
       }, 880);
       return;
@@ -281,8 +326,7 @@ export function useQuestionScreen({
 
       if (firstUnansweredIndex !== -1) {
         window.setTimeout(() => {
-          nextScrollBehaviorRef.current = "smooth";
-          setActiveGlobalIndex(currentBlockStartIndex + firstUnansweredIndex);
+          animateToQuestion(currentBlockStartIndex + firstUnansweredIndex);
         }, 120);
       }
 
@@ -293,6 +337,7 @@ export function useQuestionScreen({
   };
 
   return {
+    activeGlobalIndex,
     cardRefs,
     currentQuestionNumber,
     handleBack,
@@ -301,5 +346,7 @@ export function useQuestionScreen({
     handleTouchStart,
     progress,
     scrollRef,
+    transitionTargetIndex,
+    visualFocusIndex,
   };
 }

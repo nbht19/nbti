@@ -7,7 +7,8 @@
   position: relative;
   height: 460px;
   overflow: hidden;
-  perspective: 1200px;
+  perspective: 900px;
+  perspective-origin: 50% 50%;
 }
 
 .block-scroll {
@@ -26,6 +27,7 @@
   align-items: start;
   width: 100%;
   min-height: 100%;
+  transform-style: preserve-3d;
 }
 
 @media (max-width: 520px) {

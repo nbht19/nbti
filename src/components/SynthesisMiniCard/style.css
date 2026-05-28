@@ -1,9 +1,9 @@
 .mini-card {
   min-height: 78px;
   padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--card-bg);
   box-shadow: 0 10px 24px rgba(29, 43, 58, 0.08);
   opacity: 0;
   transform-origin: center;
@@ -51,7 +51,7 @@
 .mini-options span.is-selected {
   border-color: var(--accent);
   background: var(--accent);
-  box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.16);
+  box-shadow: 0 0 0 2px var(--accent-shadow);
 }
 
 @keyframes mini-card-reflow {

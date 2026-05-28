@@ -34,7 +34,7 @@
   position: absolute;
   width: min(54vw, 320px);
   aspect-ratio: 1;
-  border: 2px solid rgba(47, 128, 237, 0.32);
+  border: 2px solid var(--accent);
   border-radius: 50%;
   animation: ring-pulse 1600ms ease-in-out infinite;
 }
