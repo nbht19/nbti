@@ -27,6 +27,7 @@ export function QuestionScreen(props: QuestionScreenProps) {
     handleBack,
     handleQuestionAnswer,
     handleTouchEnd,
+    handleTouchMove,
     handleTouchStart,
     progress,
     scrollRef,
@@ -47,6 +48,7 @@ export function QuestionScreen(props: QuestionScreenProps) {
           className="block-scroll"
           ref={scrollRef}
           onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
           <div className="blocks-track">

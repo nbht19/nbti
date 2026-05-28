@@ -268,6 +268,10 @@ export function useQuestionScreen({
     touchStartYRef.current = event.touches[0]?.clientY ?? null;
   };
 
+  const handleTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
   const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
     if (touchStartYRef.current === null) return;
 
@@ -343,6 +347,7 @@ export function useQuestionScreen({
     handleBack,
     handleQuestionAnswer,
     handleTouchEnd,
+    handleTouchMove,
     handleTouchStart,
     progress,
     scrollRef,
