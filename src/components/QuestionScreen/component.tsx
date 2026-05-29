@@ -22,31 +22,34 @@ export function QuestionScreen(props: QuestionScreenProps) {
   } = props;
   const {
     activeGlobalIndex,
+    canGoNextBlockDirectly,
     cardRefs,
-    currentQuestionNumber,
     handleBack,
+    handleStartSynthesis,
+    handleGoNextBlock,
     handleQuestionAnswer,
     handleTouchEnd,
+    handleTouchMove,
     handleTouchStart,
-    progress,
     scrollRef,
     transitionTargetIndex,
-    visualFocusIndex,
   } = useQuestionScreen(props);
 
   return (
     <section className="question-stage">
       <QuestionHeader
-        currentQuestionNumber={currentQuestionNumber}
-        progress={progress}
+        currentBlockNumber={currentStep + 1}
         canGoBack={canGoBack}
+        canGoForward={canGoNextBlockDirectly}
         onBack={handleBack}
+        onForward={handleGoNextBlock}
       />
       <div className="question-stack">
         <div
           className="block-scroll"
           ref={scrollRef}
           onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
           <div className="blocks-track">
@@ -58,9 +61,9 @@ export function QuestionScreen(props: QuestionScreenProps) {
                 isActiveBlock={blockIndex === currentStep}
                 activeGlobalIndex={activeGlobalIndex}
                 transitionTargetIndex={transitionTargetIndex}
-                visualFocusIndex={visualFocusIndex}
                 cardRefs={cardRefs}
                 onAnswer={handleQuestionAnswer}
+                onSynthesis={handleStartSynthesis}
                 key={blockIndex}
               />
             ))}

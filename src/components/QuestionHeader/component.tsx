@@ -1,45 +1,64 @@
-import { Button, Progress, Text } from "@chakra-ui/react";
-import { totalQuestions } from "../../quiz";
+import { Button, Text } from "@chakra-ui/react";
+import { totalSteps } from "../../quiz";
 import "./style.css";
 
 type QuestionHeaderProps = {
-  currentQuestionNumber: number;
-  progress: number;
+  currentBlockNumber: number;
   canGoBack: boolean;
+  canGoForward: boolean;
   onBack: () => void;
+  onForward: () => void;
 };
 
 export function QuestionHeader({
-  currentQuestionNumber,
-  progress,
+  currentBlockNumber,
   canGoBack,
+  canGoForward,
   onBack,
+  onForward,
 }: QuestionHeaderProps) {
   return (
     <div className="question-header">
       <div className="step-row">
-        <Text as="span" className="step-count">
-          {currentQuestionNumber} / {totalQuestions}
+        <Button
+          className="nav-button"
+          variant="outline"
+          type="button"
+          onClick={onBack}
+          disabled={!canGoBack}
+        >
+          前のブロック
+        </Button>
+        <Text as="span" className="block-count">
+          BLOCK {currentBlockNumber} / {totalSteps}
         </Text>
+        <Button
+          className="nav-button"
+          variant="outline"
+          type="button"
+          onClick={onForward}
+          disabled={!canGoForward}
+        >
+          次のブロック
+        </Button>
       </div>
-      <Progress.Root
-        className="progress-bar"
-        aria-label="診断の進捗"
-        value={progress}
+      <div
+        className="block-progress"
+        aria-label={`ブロック進捗 ${currentBlockNumber} / ${totalSteps}`}
+        role="progressbar"
+        aria-valuemin={1}
+        aria-valuemax={totalSteps}
+        aria-valuenow={currentBlockNumber}
       >
-        <Progress.Track className="progress-track">
-          <Progress.Range className="progress-inner" />
-        </Progress.Track>
-      </Progress.Root>
-      <Button
-        className="back-button"
-        variant="outline"
-        type="button"
-        onClick={onBack}
-        disabled={!canGoBack}
-      >
-        戻る
-      </Button>
+        {Array.from({ length: totalSteps }).map((_, index) => (
+          <span
+            className={`block-progress-segment${
+              index < currentBlockNumber ? " is-complete" : ""
+            }${index + 1 === currentBlockNumber ? " is-current" : ""}`}
+            key={index}
+          />
+        ))}
+      </div>
     </div>
   );
 }

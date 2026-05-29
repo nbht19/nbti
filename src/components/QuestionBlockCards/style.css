@@ -137,6 +137,54 @@
   z-index: 1;
 }
 
+.synthesis-action-card-inner {
+  justify-content: center;
+  text-align: center;
+}
+
+.synthesis-card-eyebrow {
+  margin: 0 0 12px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.synthesis-card-title {
+  margin: 0 0 12px;
+  color: var(--primary);
+  font-size: clamp(1.18rem, 4vw, 1.55rem);
+  font-weight: 850;
+  line-height: 1.42;
+}
+
+.synthesis-card-text {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.synthesis-card-button {
+  width: 100%;
+  min-height: 50px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font-weight: 850;
+  box-shadow: 0 12px 24px var(--accent-shadow);
+}
+
+.synthesis-card-button:disabled {
+  cursor: not-allowed;
+}
+
+.synthesis-card-button:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
 .ghost-card {
   width: 80%;
   visibility: hidden;

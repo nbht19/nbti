@@ -4,6 +4,8 @@ import {
   getQuestionGlobalIndex,
   getQuestionPreview,
   questionBlocks,
+  totalQuestions,
+  totalSteps,
   type QuestionBlock,
   type SelectedAnswerMap,
 } from "../../quiz";
@@ -16,13 +18,13 @@ type QuestionBlockCardsProps = {
   isActiveBlock: boolean;
   activeGlobalIndex: number;
   transitionTargetIndex: number | null;
-  visualFocusIndex: number;
   cardRefs: MutableRefObject<Array<HTMLElement | null>>;
   onAnswer: (
     globalIndex: number,
     blockQuestionIndex: number,
     choice: 0 | 1,
   ) => void;
+  onSynthesis: () => void;
 };
 
 export function QuestionBlockCards({
@@ -32,9 +34,9 @@ export function QuestionBlockCards({
   isActiveBlock,
   activeGlobalIndex,
   transitionTargetIndex,
-  visualFocusIndex,
   cardRefs,
   onAnswer,
+  onSynthesis,
 }: QuestionBlockCardsProps) {
   const previousQuestionCount = questionBlocks
     .slice(0, blockIndex)
@@ -43,6 +45,14 @@ export function QuestionBlockCards({
       0,
     );
   const leadingGhostCardCount = Math.max(previousQuestionCount - blockIndex, 0);
+  const isLastBlock = blockIndex === totalSteps - 1;
+  const isLastBlockComplete =
+    isLastBlock &&
+    block.questions.every((_, index) => {
+      const globalIndex = getQuestionGlobalIndex(blockIndex, index);
+
+      return selectedAnswers[globalIndex] !== undefined;
+    });
 
   return (
     <div className="question-block-column">
@@ -58,11 +68,8 @@ export function QuestionBlockCards({
         const globalIndex = getQuestionGlobalIndex(blockIndex, index);
         const preview = getQuestionPreview(globalIndex);
         const selectedIndex = selectedAnswers[globalIndex];
-        const rawRelativePosition = globalIndex - visualFocusIndex;
-        const relativePosition = Math.max(
-          -2,
-          Math.min(2, rawRelativePosition),
-        );
+        const rawRelativePosition = globalIndex - activeGlobalIndex;
+        const relativePosition = Math.max(-2, Math.min(2, rawRelativePosition));
         const isActiveQuestion = Math.abs(rawRelativePosition) < 0.001;
         const isStoredActiveQuestion = globalIndex === activeGlobalIndex;
         const isTransitionTarget = globalIndex === transitionTargetIndex;
@@ -109,7 +116,7 @@ export function QuestionBlockCards({
                 options={preview.options}
                 selectedIndex={selectedIndex}
                 onSelect={
-                  isActiveBlock
+                  isActiveBlock && globalIndex === activeGlobalIndex
                     ? (choice) => onAnswer(globalIndex, index, choice)
                     : undefined
                 }
@@ -119,6 +126,58 @@ export function QuestionBlockCards({
           </article>
         );
       })}
+      {isLastBlock && (
+        <article
+          className={`block-card current-card synthesis-action-card${
+            activeGlobalIndex === totalQuestions
+              ? " is-active-question"
+              : " is-after-question"
+          }${
+            isLastBlockComplete ||
+            activeGlobalIndex === totalQuestions ||
+            transitionTargetIndex === totalQuestions
+              ? ""
+              : " is-hidden-block-card"
+          }`}
+          style={
+            {
+              "--card-offset": Math.max(
+                -2,
+                Math.min(2, totalQuestions - activeGlobalIndex),
+              ),
+              "--card-depth": Math.abs(totalQuestions - activeGlobalIndex),
+              "--card-scale":
+                1 - 0.075 * Math.abs(totalQuestions - activeGlobalIndex),
+            } as CSSProperties
+          }
+          aria-hidden={!isActiveBlock}
+          ref={(el) => {
+            cardRefs.current[totalQuestions] = el;
+          }}
+        >
+          <div
+            className="block-question-card synthesis-action-card-inner"
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <h2 className="synthesis-card-title">すべての回答が揃いました</h2>
+            <p className="synthesis-card-text">
+              60枚のカードを集計して、診断結果を表示します。
+            </p>
+            <button
+              className="synthesis-card-button"
+              type="button"
+              onClick={onSynthesis}
+              disabled={activeGlobalIndex !== totalQuestions}
+            >
+              集計する
+            </button>
+          </div>
+        </article>
+      )}
       <div className="ghost-card block-ghost-card" aria-hidden="true" />
     </div>
   );
